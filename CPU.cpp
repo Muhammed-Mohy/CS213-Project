@@ -25,7 +25,7 @@ int CPU::getPC() const { return m_pc; }
 
 const std::string& CPU::getIR() const { return m_ir; }
 
-RegisterFile CPU::getRegisters() { return m_registers; }
+const RegisterFile& CPU::getRegisters() { return m_registers; }
 
 void CPU::runUntilHalt()
 {
@@ -35,9 +35,22 @@ void CPU::runUntilHalt()
     }
 }
 
-void CPU::step() {}
-
-Instruction CPU::decode() { return Instruction{}; }
-
 void CPU::execute( const Instruction& m_inst ) {}
 
+Instruction CPU::decode()
+{
+    return m_controlUnit.parse(m_ir); 
+}
+
+void CPU::step()
+{
+    fetch(); 
+    Instruction m_inst = decode(); 
+    if( !m_controlUnit.validate( m_inst ) )
+    {
+        m_halted = true; 
+        return; 
+    }
+
+    execute( m_inst ); 
+}

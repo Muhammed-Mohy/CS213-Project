@@ -15,7 +15,7 @@ public:
     void reset(int startAddress); 
     void fetch(); 
     Instruction decode(); 
-    void execute( const Instruction& inst ); 
+    void execute( const Instruction& m_inst ); 
     void step(); 
     void runUntilHalt(); 
     bool isHalted() const; 
