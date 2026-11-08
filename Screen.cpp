@@ -3,24 +3,9 @@
 #include <iomanip>
 #include <sstream>
 
-namespace {
-
-std::string formatHexAddress(std::size_t address)
-{
-    std::ostringstream formattedAddress;
-    formattedAddress << "0x"
-                     << std::uppercase << std::hex
-                     << std::setfill('0') << std::setw(2)
-                     << address;
-    return formattedAddress.str();
-}
-
-} // namespace
-
 Screen::Screen(std::istream& input, std::ostream& output)
     : m_input(input),
-      m_output(output),
-      m_machineOutput()
+      m_output(output)
 {
 }
 
@@ -45,14 +30,14 @@ int Screen::promptMenuChoice() const
     }
 
     std::istringstream choiceStream(line);
-    int choice = 0;
+    int choice;
 
-    if (!(choiceStream >> choice) || choice < 0) {
+    if (!(choiceStream >> choice) || choice < 0 || choice > 4) {
         return InvalidMenuChoice;
     }
 
-    choiceStream >> std::ws;
-    if (!choiceStream.eof()) {
+    char extraCharacter;
+    if (choiceStream >> extraCharacter) {
         return InvalidMenuChoice;
     }
 
@@ -76,7 +61,10 @@ void Screen::displayMemory(const std::vector<std::string>& memory) const
 {
     m_output << "\n=== Memory ===\n";
     for (std::size_t address = 0; address < memory.size(); ++address) {
-        m_output << formatHexAddress(address) << ": "
+        m_output << "0x" << std::uppercase << std::hex
+                 << std::setfill('0') << std::setw(2) << address
+                 << std::dec << std::nouppercase << std::setfill(' ')
+                 << ": "
                  << memory[address] << '\n';
     }
 }
@@ -102,28 +90,18 @@ void Screen::displayMachineState(
     }
 }
 
-void Screen::appendMachineOutput(const std::string& text)
-{
-    m_machineOutput += text;
-}
-
-void Screen::displayMachineOutput() const
+void Screen::displayMachineOutput(const std::string& text) const
 {
     m_output << "\n=== Program Output ===\n";
-    if (m_machineOutput.empty()) {
+    if (text.empty()) {
         m_output << "(no output)\n";
         return;
     }
 
-    m_output << m_machineOutput;
-    if (m_machineOutput[m_machineOutput.size() - 1] != '\n') {
+    m_output << text;
+    if (text[text.size() - 1] != '\n') {
         m_output << '\n';
     }
-}
-
-void Screen::clearMachineOutput()
-{
-    m_machineOutput.clear();
 }
 
 void Screen::showStatus(const std::string& message) const
