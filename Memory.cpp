@@ -4,7 +4,7 @@
 
 using namespace std;
 
-Memory::Memory() {
+Memory::Memory(Screen& screen) : screen(screen) {
     cells.resize(SIZE, "00");
 }
 

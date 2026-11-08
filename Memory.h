@@ -14,7 +14,7 @@ private:
     static const int SIZE = 256;
     static const int SCREEN_ADDR = 0xFF;
     vector<string>cells;
-    Screen screen;
+    Screen& screen;
 public:
     string read(int address);
     void write(int address, string value);
@@ -28,7 +28,5 @@ public:
     void displayMatrix();
     void clear();
 
-    Memory();
-};
-
+    Memory(Screen& screen);
 #endif 
