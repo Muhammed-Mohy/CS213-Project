@@ -25,9 +25,7 @@ public:
         const std::string& ir,
         const std::vector<std::string>& registers) const;
 
-    void appendMachineOutput(const std::string& text);
-    void displayMachineOutput() const;
-    void clearMachineOutput();
+    void displayMachineOutput(const std::string& text) const;
 
     void showStatus(const std::string& message) const;
     void showError(const std::string& message) const;
@@ -35,7 +33,6 @@ public:
 private:
     std::istream& m_input;
     std::ostream& m_output;
-    std::string m_machineOutput;
 };
 
 #endif
