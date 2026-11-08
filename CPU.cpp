@@ -25,7 +25,7 @@ int CPU::getPC() const { return m_pc; }
 
 const std::string& CPU::getIR() const { return m_ir; }
 
-const RegisterFile& CPU::getRegisters() { return m_registers; }
+const RegisterFile& CPU::getRegisters() const { return m_registers; }
 
 void CPU::runUntilHalt()
 {
@@ -35,7 +35,46 @@ void CPU::runUntilHalt()
     }
 }
 
-void CPU::execute( const Instruction& m_inst ) {}
+void CPU::execute( const Instruction& m_inst ) 
+{
+    int reg{ m_inst.getRegisterIndex() };
+    int address{ m_inst.getAddressOrValue() };
+    char op{ m_inst.getOpCode() }; 
+    
+    switch( op )
+    {
+        case '1': 
+            m_registers.setRegister( reg, m_memory.read(address)); 
+            break; 
+
+        case '2': 
+        {
+            char hexChars[] {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'}; 
+            int highDigit{ address / 16 }; 
+            int lowDigit{ address % 16 }; 
+            std::string hexString { "" }; 
+            hexString += hexChars[ highDigit ]; 
+            hexString += hexChars[ lowDigit ]; 
+            m_registers.setRegister( reg, hexString ); 
+            break; 
+        }
+
+        case '3': 
+        m_memory.write( address, m_registers.getRegister( reg )); 
+        break; 
+
+        case 'C': 
+        m_halted = true; 
+        return; 
+
+        default: 
+            break;
+
+        }
+
+        if( !m_halted )
+            m_pc += 2; 
+}
 
 Instruction CPU::decode()
 {
