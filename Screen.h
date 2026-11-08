@@ -15,6 +15,11 @@ public:
     Screen(std::istream& input = std::cin,
            std::ostream& output = std::cout);
 
+    void write(std::string value);
+    std::string read() const;
+    void display() const;
+    void clear();
+
     void showMainMenu() const;
     int promptMenuChoice() const;
     std::string promptLine(const std::string& prompt) const;
@@ -31,6 +36,7 @@ public:
     void showError(const std::string& message) const;
 
 private:
+    std::string content;
     std::istream& m_input;
     std::ostream& m_output;
 };

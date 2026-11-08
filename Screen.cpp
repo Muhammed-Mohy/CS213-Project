@@ -4,9 +4,30 @@
 #include <sstream>
 
 Screen::Screen(std::istream& input, std::ostream& output)
-    : m_input(input),
+    : content(),
+      m_input(input),
       m_output(output)
 {
+}
+
+void Screen::write(std::string value)
+{
+    content += value;
+}
+
+std::string Screen::read() const
+{
+    return content;
+}
+
+void Screen::display() const
+{
+    m_output << content;
+}
+
+void Screen::clear()
+{
+    content.clear();
 }
 
 void Screen::showMainMenu() const
