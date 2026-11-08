@@ -27,6 +27,8 @@ public:
 
     void displayMatrix();
     void clear();
-}
+
+    Memory();
+};
 
 #endif 

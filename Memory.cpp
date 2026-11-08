@@ -78,9 +78,9 @@ void Memory::displayMatrix() {
             cout << "[FF: Screen I/O]" << endl;
         } else {
             cout <<  cells[i] << " " << endl;
-        }
-        if ((i + 1) % 16 == 0) {
+            if ((i + 1) % 16 == 0) {
             cout << endl;
+            }
         }
     }
 }
