@@ -15,16 +15,16 @@ private:
     vector<string>cells;
     Screen& screen;
 public:
-    string read(int address);
+    string read(int address) const;
     void write(int address, string value);
-    string readWord(int address);
+    string readWord(int address) const;
     void loadFromFile(string filePath, int startAddress);
 
-    bool isValidAddress(int address);
-    bool isEvenAddress(int address);
-    bool isValidInstructionAddress(int address);
+    bool isValidAddress(int address) const;
+    bool isEvenAddress(int address) const;
+    bool isValidInstructionAddress(int address) const;
 
-    void displayMatrix();
+    void displayMatrix() const;
     void clear();
 
     Memory(Screen& screen);
