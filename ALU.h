@@ -1,4 +1,3 @@
-#pragma once
 #ifndef ALU_H
 #define ALU_H
 
@@ -10,8 +9,6 @@ using namespace std;
 class ALU
 {
 public:
-    ALU();
-    ~ALU();
 
     string addTwoComplement(string a, string b);
     string addFloatingPoint(string a, string b);
