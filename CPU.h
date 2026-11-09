@@ -15,12 +15,13 @@ public:
     void reset(int startAddress); 
     void fetch(); 
     Instruction decode(); 
-    void execute( const Instruction& m_inst ); 
+    void execute( const Instruction& inst ); 
     void step(); 
     void runUntilHalt(); 
     bool isHalted() const; 
     int getPC() const; 
     const std::string& getIR() const; 
+    RegisterFile& getRegisters(); 
     const RegisterFile& getRegisters() const; 
 
 private:

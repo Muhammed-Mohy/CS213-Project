@@ -25,26 +25,34 @@ int CPU::getPC() const { return m_pc; }
 
 const std::string& CPU::getIR() const { return m_ir; }
 
+RegisterFile& CPU::getRegisters() { return m_registers; }
+
 const RegisterFile& CPU::getRegisters() const { return m_registers; }
 
 void CPU::runUntilHalt()
 {
-    while( !m_halted  )
+    int steps{ 0 }; 
+    while( !m_halted && steps < 65536 )
     {
         step(); 
+        ++steps; 
     }
+    if( !m_halted )
+        m_halted = true; 
 }
 
-void CPU::execute( const Instruction& m_inst ) 
+void CPU::execute( const Instruction& inst ) 
 {
-    int reg{ m_inst.getR() };
-    int address{ m_inst.getAddressXY() };
-    char op{ m_inst.getOpcode() }; 
+    int reg{ inst.getR() };
+    int address{ inst.getAddressXY() };
+    char op{ inst.getOpcode() }; 
+    if( op >= 'a' && op <= 'z' )
+        op = static_cast<char>(op - 32); 
     
     switch( op )
     {
         case '1': 
-            m_registers.setRegister( reg, m_memory.read(address)); 
+            m_registers.write( reg, m_memory.read(address)); 
             break; 
 
         case '2': 
@@ -55,77 +63,72 @@ void CPU::execute( const Instruction& m_inst )
             std::string hexString { "" }; 
             hexString += hexChars[ highDigit ]; 
             hexString += hexChars[ lowDigit ]; 
-            m_registers.setRegister( reg, hexString ); 
+            m_registers.write( reg, hexString ); 
             break; 
         }
 
         case '3': 
-        m_memory.write( address, m_registers.getRegister( reg )); 
+        m_memory.write( address, m_registers.read( reg )); 
         break; 
 
         case '4': 
         {
-            int s{ m_inst.getS() }; 
-            int t{ m_inst.getT() }; 
-            m_registers.setRegister( t, m_registers.getRegister(s) ); 
+            int s{ inst.getS() }; 
+            int t{ inst.getT() }; 
+            m_registers.write( t, m_registers.read(s) ); 
             break; 
         }
 
-        // two's complement
         case '5': 
         {
-            int s{ m_inst.getS() };
-            int t{ m_inst.getT() };
-            m_registers.setRegister( reg, m_alu.addTwoComplement( m_registers.getRegister(s), m_registers.getRegister(t) ) );
+            int s{ inst.getS() };
+            int t{ inst.getT() };
+            m_registers.write( reg, m_alu.addTwoComplement( m_registers.read(s), m_registers.read(t) ) );
             break;
         }
 
-        // floating point
         case '6': 
         {
-            int s{ m_inst.getS() };
-            int t{ m_inst.getT() };
-            m_registers.setRegister( reg, m_alu.addFloatingPoint( m_registers.getRegister(s), m_registers.getRegister(t) ) );
+            int s{ inst.getS() };
+            int t{ inst.getT() };
+            m_registers.write( reg, m_alu.addFloatingPoint( m_registers.read(s), m_registers.read(t) ) );
             break;
         }
 
-        // Or
         case '7': 
         {
-            int s{ m_inst.getS() };
-            int t{ m_inst.getT() };
-            m_registers.setRegister( reg, m_alu.bitwiseOr( m_registers.getRegister(s), m_registers.getRegister(t) ) );
+            int s{ inst.getS() };
+            int t{ inst.getT() };
+            m_registers.write( reg, m_alu.bitwiseOr( m_registers.read(s), m_registers.read(t) ) );
             break;
         }
 
-        // AND
         case '8': 
         {
-            int s{ m_inst.getS() };
-            int t{ m_inst.getT() };
-            m_registers.bitwiseAnd( reg, m_alu.addFloatingPoint( m_registers.getRegister(s), m_registers.getRegister(t) ) );
+            int s{ inst.getS() };
+            int t{ inst.getT() };
+            m_registers.write( reg, m_alu.bitwiseAnd( m_registers.read(s), m_registers.read(t) ) );
             break;
         }
 
-        // XOR
         case '9': 
         {
-            int s{ m_inst.getS() };
-            int t{ m_inst.getT() };
-            m_registers.bitwiseXor( reg, m_alu.addFloatingPoint( m_registers.getRegister(s), m_registers.getRegister(t) ) );
+            int s{ inst.getS() };
+            int t{ inst.getT() };
+            m_registers.write( reg, m_alu.bitwiseXor( m_registers.read(s), m_registers.read(t) ) );
             break;
         }
 
         case 'A': 
         {
-            int times{ m_inst. getRotateCount() }; 
-            m_registers.setRegister( reg, m_alu.rotateRight( m_registers.getRegister(reg), times) ); 
+            int times{ inst.getRotateCount() }; 
+            m_registers.write( reg, m_alu.rotateRight( m_registers.read(reg), times) ); 
             break; 
         }
 
         case 'B': 
         {
-            if( m_registers.getRegister(reg) == m_registers.getRegister(0) )
+            if( m_registers.read(reg) == m_registers.read(0) )
             {
                 m_pc = address; 
                 return; 
@@ -153,13 +156,16 @@ Instruction CPU::decode()
 
 void CPU::step()
 {
+    if( m_halted )
+        return; 
+
     fetch(); 
-    Instruction m_inst = decode(); 
-    if( !m_controlUnit.validate( m_inst ) )
+    Instruction inst = decode(); 
+    if( !m_controlUnit.validate( inst ) )
     {
         m_halted = true; 
         return; 
     }
 
-    execute( m_inst ); 
+    execute( inst ); 
 }
