@@ -1,4 +1,3 @@
-#pragma once
 #ifndef MEMORY_H
 #define MEMORY_H
 #include "Screen.h"
@@ -29,4 +28,5 @@ public:
     void clear();
 
     Memory(Screen& screen);
+};    
 #endif 
