@@ -2,34 +2,57 @@
 #include <cctype>
 #include <sstream>
 
-Instruction::Instruction(const std::string& raw) {
-    rawInstruction = raw;
+Instruction::Instruction(const std::string& rawInstruction) {
+    raw = rawInstruction;
     if (isValid()) {
-        opCode = raw[0];
-
+        opcode = raw[0];
+        
         std::stringstream ss1;
         ss1 << std::hex << raw[1];
-        ss1 >> registerIndex;
+        ss1 >> r;
 
         std::stringstream ss2;
-        ss2 << std::hex << raw.substr(2, 2);
-        ss2 >> addressOrValue;
+        ss2 << std::hex << raw[2];
+        ss2 >> s;
+
+        std::stringstream ss3;
+        ss3 << std::hex << raw[3];
+        ss3 >> t;
     } else {
-        opCode = '\0';
-        registerIndex = 0;
-        addressOrValue = 0;
+        opcode = '\0';
+        r = 0;
+        s = 0;
+        t = 0;
     }
 }
 
 bool Instruction::isValid() const {
-    if (rawInstruction.length() != 4) return false;
-    for (char c : rawInstruction) {
+    if (raw.length() != 4) return false;
+    for (char c : raw) {
         if (!isxdigit(static_cast<unsigned char>(c))) return false;
     }
     return true;
 }
 
-char Instruction::getOpCode() const { return opCode; }
-int Instruction::getRegisterIndex() const { return registerIndex; }
-int Instruction::getAddressOrValue() const { return addressOrValue; }
-std::string Instruction::getRawInstruction() const { return rawInstruction; }
+bool Instruction::isHalt() const {
+    return raw == "C000" || opcode == 'C' || opcode == 'c';
+}
+
+std::string Instruction::getRaw() const { return raw; }
+char Instruction::getOpcode() const { return opcode; }
+int Instruction::getR() const { return r; }
+int Instruction::getS() const { return s; }
+int Instruction::getT() const { return t; }
+
+
+int Instruction::getAddressXY() const {
+    int val = 0;
+    std::stringstream ss;
+    ss << std::hex << raw.substr(2, 2);
+    ss >> val;
+    return val;
+}
+
+int Instruction::getRotateCount() const {
+    return t; 
+}
