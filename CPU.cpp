@@ -37,9 +37,9 @@ void CPU::runUntilHalt()
 
 void CPU::execute( const Instruction& m_inst ) 
 {
-    int reg{ m_inst.getRegisterIndex() };
-    int address{ m_inst.getAddressOrValue() };
-    char op{ m_inst.getOpCode() }; 
+    int reg{ m_inst.getR() };
+    int address{ m_inst.getAddressXY() };
+    char op{ m_inst.getOpcode() }; 
     
     switch( op )
     {
@@ -62,6 +62,76 @@ void CPU::execute( const Instruction& m_inst )
         case '3': 
         m_memory.write( address, m_registers.getRegister( reg )); 
         break; 
+
+        case '4': 
+        {
+            int s{ m_inst.getS() }; 
+            int t{ m_inst.getT() }; 
+            m_registers.setRegister( t, m_registers.getRegister(s) ); 
+            break; 
+        }
+
+        // two's complement
+        case '5': 
+        {
+            int s{ m_inst.getS() };
+            int t{ m_inst.getT() };
+            m_registers.setRegister( reg, m_alu.addTwoComplement( m_registers.getRegister(s), m_registers.getRegister(t) ) );
+            break;
+        }
+
+        // floating point
+        case '6': 
+        {
+            int s{ m_inst.getS() };
+            int t{ m_inst.getT() };
+            m_registers.setRegister( reg, m_alu.addFloatingPoint( m_registers.getRegister(s), m_registers.getRegister(t) ) );
+            break;
+        }
+
+        // Or
+        case '7': 
+        {
+            int s{ m_inst.getS() };
+            int t{ m_inst.getT() };
+            m_registers.setRegister( reg, m_alu.bitwiseOr( m_registers.getRegister(s), m_registers.getRegister(t) ) );
+            break;
+        }
+
+        // AND
+        case '8': 
+        {
+            int s{ m_inst.getS() };
+            int t{ m_inst.getT() };
+            m_registers.bitwiseAnd( reg, m_alu.addFloatingPoint( m_registers.getRegister(s), m_registers.getRegister(t) ) );
+            break;
+        }
+
+        // XOR
+        case '9': 
+        {
+            int s{ m_inst.getS() };
+            int t{ m_inst.getT() };
+            m_registers.bitwiseXor( reg, m_alu.addFloatingPoint( m_registers.getRegister(s), m_registers.getRegister(t) ) );
+            break;
+        }
+
+        case 'A': 
+        {
+            int times{ m_inst. getRotateCount() }; 
+            m_registers.setRegister( reg, m_alu.rotateRight( m_registers.getRegister(reg), times) ); 
+            break; 
+        }
+
+        case 'B': 
+        {
+            if( m_registers.getRegister(reg) == m_registers.getRegister(0) )
+            {
+                m_pc = address; 
+                return; 
+            }
+            break; 
+        }
 
         case 'C': 
         m_halted = true; 
