@@ -21,12 +21,17 @@ bool ControlUnit::validate(const Instruction& inst)
     }
 
     char op{ inst.getOpcode() };
+    if (op >= 'a' && op <= 'z')
+    {
+        op = static_cast<char>(op - 32);
+    }
+
     int r{ inst.getR() };
     int s{ inst.getS() };
     int t{ inst.getT() };
     int address{ inst.getAddressXY() };
 
-    switch ( op )
+    switch (op)
     {
         case '1':
         case '2':
@@ -59,7 +64,7 @@ bool ControlUnit::validate(const Instruction& inst)
                    address + 1 < 0xFF;
 
         case 'C':
-            return raw == "C000";
+            return raw == "C000" || raw == "c000";
 
         default:
             return false;
