@@ -1,3 +1,4 @@
+#include "ALU.h"
 #include "Memory.h"
 #include <iostream>
 #include <fstream>
