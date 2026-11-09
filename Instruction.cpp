@@ -35,7 +35,7 @@ bool Instruction::isValid() const {
 }
 
 bool Instruction::isHalt() const {
-    return raw == "C000" || opcode == 'C' || opcode == 'c';
+    return raw == "C000";
 }
 
 std::string Instruction::getRaw() const { return raw; }
