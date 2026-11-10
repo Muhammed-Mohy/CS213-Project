@@ -72,22 +72,45 @@ void Memory::loadFromFile(string filePath, int startAddress) {
     int address = startAddress;
 
     while (file >> line) {
-        if (address >= SCREEN_ADDR) {
-            cout << "Error: Program exceeds available memory."
-                 << endl;
-            break;
+        for (int i = 0; i < (int)line.length(); i++) {
+            line[i] = toupper(static_cast<unsigned char>(line[i]));
         }
 
-        if (line.length() != 2 ||
-            !isxdigit(static_cast<unsigned char>(line[0])) ||
-            !isxdigit(static_cast<unsigned char>(line[1]))) {
+        if (line.length() == 4 &&
+            isxdigit(static_cast<unsigned char>(line[0])) &&
+            isxdigit(static_cast<unsigned char>(line[1])) &&
+            isxdigit(static_cast<unsigned char>(line[2])) &&
+            isxdigit(static_cast<unsigned char>(line[3]))) {
+
+            if (address + 1 >= SCREEN_ADDR) {
+                cout << "Error: Program exceeds available memory."
+                     << endl;
+                break;
+            }
+
+            cells[address] = line.substr(0, 2);
+            cells[address + 1] = line.substr(2, 2);
+            address += 2;
+        }
+
+        else if (line.length() == 2 &&
+                 isxdigit(static_cast<unsigned char>(line[0])) &&
+                 isxdigit(static_cast<unsigned char>(line[1]))) {
+
+            if (address >= SCREEN_ADDR) {
+                cout << "Error: Program exceeds available memory."
+                     << endl;
+                break;
+            }
+
+            cells[address] = line;
+            address += 1;
+        }
+        else {
             cout << "Error: Invalid memory cell value: "
                  << line << endl;
             break;
         }
-
-        cells[address] = line;
-        address++;
     }
 
     file.close();
