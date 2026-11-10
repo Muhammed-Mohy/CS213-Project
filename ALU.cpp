@@ -1,115 +1,131 @@
 #include "ALU.h"
-#include "Memory.h"
 #include <iostream>
-#include <fstream>
-#include <cctype>
+#include <string>
+#include <iomanip>
+#include <sstream>
+#include <cmath>
 
 using namespace std;
 
-Memory::Memory(Screen& screen) : screen(screen) {
-    cells.resize(SIZE, "00");
+string ALU::addTwoComplement(string a,string b)
+{
+    int num1 = stoi(a, nullptr, 16);
+    int num2 = stoi(b, nullptr, 16);
+    
+    int result = num1 + num2;
+    result &= 0xFF;
+
+    stringstream ss;
+    ss << uppercase << hex << setw(2) << setfill('0') << result;
+
+    return ss.str();
 }
 
-bool Memory::isValidAddress(int address) const {
-    return address >= 0 && address < SIZE;
-}
+string ALU::addFloatingPoint(string a, string b)
+{
+    int n1 = stoi(a, nullptr, 16);
+    int n2 = stoi(b, nullptr, 16);
 
-bool Memory::isEvenAddress(int address) const {
-    return address % 2 == 0;
-}
+    int s1 = (n1 >> 7) & 1;
+    int e1 = (n1 >> 4) & 7;
+    int m1 = n1 & 15;
 
-bool Memory::isValidInstructionAddress(int address) const {
-    return isValidAddress(address) && isEvenAddress(address) && (address + 1 < SCREEN_ADDR);
-}
+    int s2 = (n2 >> 7) & 1;
+    int e2 = (n2 >> 4) & 7;
+    int m2 = n2 & 15;
 
-string Memory::read(int address) const {
-    if (address == SCREEN_ADDR) {
-        return screen.read();
-    }
-    if (isValidAddress(address)) {
-        return cells[address];
-    } else {
-        cout << "Error: Invalid memory address " << address << endl;
-        return "00";
-    }
-}
+    float v1 = (m1 / 16.0f) * pow(2.0f, e1 - 4);
+    if (s1 == 1) v1 = -v1;
 
-void Memory::write(int address, string value) {
-    if (address == SCREEN_ADDR) {
-        screen.write(value);
-    } else if (isValidAddress(address)) {
-        cells[address] = value;
-    } else {
-        cout << "Error: Invalid memory address " << address << endl;
-    }
-}
+    float v2 = (m2 / 16.0f) * pow(2.0f, e2 - 4);
+    if (s2 == 1) v2 = -v2;
 
-string Memory::readWord(int address) const {
-    if (!isValidInstructionAddress(address)) {
-        cout << "Error: Invalid instruction address "
-             << address << endl;
-        return "";
+    float sum = v1 + v2;
+
+    if (sum == 0) return "00";
+
+    int sign = 0;
+    if (sum < 0) {
+        sign = 1;
+        sum = -sum;
     }
 
-    return cells[address] + cells[address + 1];
-}
+    int bestE = 0;
+    int bestM = 0;
+    float bestDiff = 1000000;
 
-void Memory::loadFromFile(string filePath, int startAddress) {
-    if (!isValidInstructionAddress(startAddress)) {
-        cout << "Error: Invalid start address for loading file."
-             << endl;
-        return;
-    }
-
-    ifstream file(filePath);
-
-    if (!file.is_open()) {
-        cout << "Error: Could not open file "
-             << filePath << endl;
-        return;
-    }
-
-    string line;
-    int address = startAddress;
-
-    while (file >> line) {
-        if (address >= SCREEN_ADDR) {
-            cout << "Error: Program exceeds available memory."
-                 << endl;
-            break;
-        }
-
-        if (line.length() != 2 ||
-            !isxdigit(static_cast<unsigned char>(line[0])) ||
-            !isxdigit(static_cast<unsigned char>(line[1]))) {
-            cout << "Error: Invalid memory cell value: "
-                 << line << endl;
-            break;
-        }
-
-        cells[address] = line;
-        address++;
-    }
-
-    file.close();
-}
-
-void Memory::displayMatrix() const {
-    for (int i = 0; i < SIZE; i++) {
-        if (i == SCREEN_ADDR) {
-            cout << "[FF: Screen I/O]" << endl;
-        } else {
-            cout << cells[i] << " ";
-            if ((i + 1) % 16 == 0) {
-                cout << endl;
+    for (int e = 0; e <= 7; e++) {
+        float mFloat = sum / pow(2.0f, e - 4) * 16.0f;
+        int m = (int)(mFloat + 0.5f);
+        if (m >= 0 && m <= 15) {
+            float back = (m / 16.0f) * pow(2.0f, e - 4);
+            float diff = sum - back;
+            if (diff < 0) diff = -diff;
+            if (diff < bestDiff) {
+                bestDiff = diff;
+                bestE = e;
+                bestM = m;
             }
         }
     }
+
+    int result = (sign << 7) | (bestE << 4) | bestM;
+
+    stringstream ss;
+    ss << uppercase << hex << setw(2) << setfill('0') << result;
+    return ss.str();
 }
 
-void Memory::clear() {
-    for (int i = 0; i < SIZE; i++) {
-        cells[i] = "00";
-    }
-    screen.clear();
+string ALU::bitwiseOr(string a, string b)
+{
+    int num1 = stoi(a, nullptr, 16);
+    int num2 = stoi(b, nullptr, 16);
+
+    int result = (num1 | num2) & 0xFF;
+
+    stringstream ss;
+    ss << uppercase << hex << setw(2) << setfill('0') << result;
+
+    return ss.str();
+}
+
+string ALU::bitwiseAnd(string a, string b)
+{
+    int num1 = stoi(a, nullptr, 16);
+    int num2 = stoi(b, nullptr, 16);
+
+    int result = (num1 & num2) & 0xFF;
+
+    stringstream ss;
+    ss << uppercase << hex << setw(2) << setfill('0') << result;
+
+    return ss.str();
+}  
+
+string ALU::bitwiseXor(string a, string b)
+{
+    int num1 = stoi(a, nullptr, 16);
+    int num2 = stoi(b, nullptr, 16);
+
+    int result = (num1 ^ num2) & 0xFF;
+
+    stringstream ss;
+    ss << uppercase << hex << setw(2) << setfill('0') << result;
+
+    return ss.str();
+}
+
+string ALU::rotateRight(string value, int times)
+{
+    int num = stoi(value, nullptr, 16);
+    int bitSize = 8;
+
+    times %= bitSize;
+    int result = ((num >> times) | (num << (bitSize - times))) & 0xFF;
+
+    stringstream ss;
+    ss << uppercase << hex << setw(2) << setfill('0') << result;
+
+    return ss.str();
+
 }
