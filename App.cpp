@@ -77,7 +77,6 @@ void App::loadProgram()
         return;
     }
 
-    m_screen.clearMachineOutput();
     m_displayedOutputLength = 0;
     m_screen.showStatus("Program loaded.");
 }
@@ -132,7 +131,6 @@ void App::displayNewMachineOutput()
     // A shorter output means the machine was reset outside this App.
     if (machineOutput.size() < m_displayedOutputLength) {
         m_displayedOutputLength = 0;
-        m_screen.clearMachineOutput();
     }
 
     if (machineOutput.size() == m_displayedOutputLength) {
@@ -142,10 +140,6 @@ void App::displayNewMachineOutput()
     const std::string newOutput =
         machineOutput.substr(m_displayedOutputLength);
 
-    // Screen displays its entire buffer, so keep only the newly produced
-    // portion here. This prevents earlier output from being printed again.
-    m_screen.clearMachineOutput();
-    m_screen.appendMachineOutput(newOutput);
-    m_screen.displayMachineOutput();
+    m_screen.displayMachineOutput(newOutput);
     m_displayedOutputLength = machineOutput.size();
 }
