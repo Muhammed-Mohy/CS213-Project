@@ -6,14 +6,16 @@
 
 class RegisterFile {
 private:
-    std::vector<std::string> registers;
+    static const int COUNT = 16; 
+    std::vector<std::string> regs;
 
 public:
     RegisterFile();
 
-    void setRegister(int index, const std::string& value);
-    std::string getRegister(int index) const;
+    std::string read(int index) const; 
+    void write(int index, const std::string& value); 
     void reset();
+    void display() const; 
 };
 
 #endif

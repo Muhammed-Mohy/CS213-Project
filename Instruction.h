@@ -5,19 +5,25 @@
 
 class Instruction {
 private:
-    std::string rawInstruction;
-    char opCode;
-    int registerIndex;
-    int addressOrValue;
+    std::string raw;     
+    char opcode;        
+    int r;            
+    int s;              
+    int t;               
 
 public:
-    Instruction(const std::string& raw);
+    Instruction(const std::string& rawInstruction);
 
     bool isValid() const;
-    char getOpCode() const;
-    int getRegisterIndex() const;
-    int getAddressOrValue() const;
-    std::string getRawInstruction() const;
+    bool isHalt() const;
+
+    std::string getRaw() const;
+    char getOpcode() const;
+    int getR() const;
+    int getS() const;
+    int getT() const;
+    int getAddressXY() const;
+    int getRotateCount() const;
 };
 
-#endif
+#endif 
