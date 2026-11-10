@@ -41,7 +41,6 @@ string ALU::addFloatingPoint(string a, string b)
     if (s2 == 1) v2 = -v2;
 
     float sum = v1 + v2;
-
     if (sum == 0) return "00";
 
     int sign = 0;
@@ -70,7 +69,6 @@ string ALU::addFloatingPoint(string a, string b)
     }
 
     int result = (sign << 7) | (bestE << 4) | bestM;
-
     stringstream ss;
     ss << uppercase << hex << setw(2) << setfill('0') << result;
     return ss.str();
@@ -80,12 +78,10 @@ string ALU::bitwiseOr(string a, string b)
 {
     int num1 = stoi(a, nullptr, 16);
     int num2 = stoi(b, nullptr, 16);
-
     int result = (num1 | num2) & 0xFF;
 
     stringstream ss;
     ss << uppercase << hex << setw(2) << setfill('0') << result;
-
     return ss.str();
 }
 
@@ -93,7 +89,6 @@ string ALU::bitwiseAnd(string a, string b)
 {
     int num1 = stoi(a, nullptr, 16);
     int num2 = stoi(b, nullptr, 16);
-
     int result = (num1 & num2) & 0xFF;
 
     stringstream ss;
@@ -106,12 +101,10 @@ string ALU::bitwiseXor(string a, string b)
 {
     int num1 = stoi(a, nullptr, 16);
     int num2 = stoi(b, nullptr, 16);
-
     int result = (num1 ^ num2) & 0xFF;
 
     stringstream ss;
     ss << uppercase << hex << setw(2) << setfill('0') << result;
-
     return ss.str();
 }
 
